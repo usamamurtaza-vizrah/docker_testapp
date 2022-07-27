@@ -1,0 +1,38 @@
+<script>
+  function setMarkerOnMap() {
+      const myLatLng = { lat: 51.509865, lng: -0.118092 };
+      const map = new google.maps.Map(document.getElementById("map"), {
+          zoom: 16,
+          center: myLatLng,
+      });
+
+      marker = new google.maps.Marker({
+          position: myLatLng,
+          map
+      });
+
+      var infowindow = new google.maps.InfoWindow({
+          content: '<a href="https://www.google.com/maps/@51.509865,-0.118092,17z" target="blank"> Open in google maps'
+      });
+      infowindow.open(map, marker);
+  }
+</script>
+
+<div class="input-group center">
+  <div class="form-outline">
+    <input type="search" id="form1" class="form-control" placeholder="Search" />
+  </div>
+  <button type="button" class="btn btn-primary">
+    Search
+  </button>
+</div>
+
+<h1>Countries Data</h1>
+
+<%#= form_tag search_products_path, method: 'get', class: 'navbar-form navbar-right' do %>
+    <%#= search_field_tag 'search_query', nil, class: 'form-control me-2', placeholder: 'Search'  %>
+    <%#= submit_tag "Search", class: 'btn btn-success', :name => nil %>
+<%# end %>
+
+<div id="map" style="width:98%; height:800px;"></div>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCwigc-J6Bax4svQkMvtTN3lyzmtzgIhUc&callback=setMarkerOnMap"></script>
