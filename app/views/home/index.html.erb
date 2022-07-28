@@ -61,7 +61,6 @@
           this.setOptions({fillColor: "#f5c879", 'fillOpacity': 0});
         });
         google.maps.event.addListener(countries[i], 'click', function(event) {
-          alert(this.title+' ('+this.code+')');
           populate_country_data(this.title);
         });
       }
@@ -76,8 +75,9 @@
         async : true,
         data: { "country_name": country_name  },
         success : function(data) {
-            var row = $('<tr><td>' + data.name + '</td><td>' + data.name_es + '</td><td>' + data.name_fr + '</td><td>' + data.name_ar + '</td><td>' + data.woe_note + '</td><td>' + data.income_group + '</td><td>' + data.economy + '</td><td>' + data.gdp_year + '</td><td>' + data.gdp_md + '</td></tr>');
-            $('#myTable').append(row);
+            var data_to_show = 'Name EN: ' + data.name + '<br/>' + 'Name ES: ' + data.name_es +  '<br/>' + 'Name FR: ' + data.name_fr + '<br/>' + 'Name AR: ' + data.name_ar + '<br/>' + 'WOE NOTE: ' + data.woe_note + '<br/>' + 'Income Group: ' + data.income_group + '<br/>' + 'Economy: ' + data.economy + '<br/>' + 'GDP Year: ' + data.gdp_year + '<br/>' + 'GDP MD: ' + data.gdp_md + '';
+            $('#country_specific_data').html(data_to_show);
+            $("#modal").modal('show');
         }
         .bind(this)
       });
@@ -86,12 +86,9 @@
     function createCountry(coords, country) {
       var currentCountry = new google.maps.Polygon({
         paths: coords,
-        //strokeColor: 'white',
         title: country.country,
         code: country.iso,
         strokeOpacity: 0,
-        //strokeWeight: 1,
-        //fillColor: country['color'], // can be used as default color
         fillOpacity: 0
       });
       countries.push(currentCountry);
@@ -101,20 +98,20 @@
 </script>
 
 
-<div id="map" style="width:100%; height:800px;" class="center"></div>
+<div id="map" class="center" style="width:100%; height:800px;"></div>
 
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCwigc-J6Bax4svQkMvtTN3lyzmtzgIhUc"></script>
 
-<table id="myTable">
-    <tr>
-        <th>Name EN</th>
-        <th>Name ES</th>
-        <th>Name FR</th>
-        <th>Name AR</th>
-        <th>Woe Note</th>
-        <th>Income Group</th>
-        <th>Economy</th>
-        <th>GDP Year</th>
-        <th>GDP MD</th>
-    </tr>
-</table>
+
+<div class="modal fade" id="modal" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="country_specific_data"></h5>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
