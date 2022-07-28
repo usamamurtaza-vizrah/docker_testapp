@@ -1,38 +1,120 @@
 <script>
-  function setMarkerOnMap() {
-      const myLatLng = { lat: 51.509865, lng: -0.118092 };
-      const map = new google.maps.Map(document.getElementById("map"), {
-          zoom: 16,
-          center: myLatLng,
-      });
 
-      marker = new google.maps.Marker({
-          position: myLatLng,
-          map
-      });
+  $( document ).ready(function(){
+    let countries = [];
 
-      var infowindow = new google.maps.InfoWindow({
-          content: '<a href="https://www.google.com/maps/@51.509865,-0.118092,17z" target="blank"> Open in google maps'
+    const map = new google.maps.Map(document.getElementById('map'), {
+      zoom: 2.5,
+      minZoom: 1,
+      center: new google.maps.LatLng(50.7244893,3.2668189)
+    });
+    
+    init();
+
+    function init() {
+      $.ajax({
+        url : 'data.json',
+        cache : true,
+        dataType : 'json',
+        async : true,
+        success : function(data) {
+          if (data) {
+            $.each(data, function(id,country) {
+              var countryCoords;
+              var ca;
+              var co;
+              if ('multi' in country) {
+                var ccArray = [];
+                for (var t in country['xml']['Polygon']) {
+                  countryCoords = [];
+                  co = country['xml']['Polygon'][t]['outerBoundaryIs']['LinearRing']['coordinates'].split(' ');
+                  for (var i in co) {
+                    ca = co[i].split(',');
+                    countryCoords.push(new google.maps.LatLng(ca[1], ca[0]));
+                  }
+                  ccArray.push(countryCoords);
+                }
+                createCountry(ccArray,country);
+              } else {
+                countryCoords = [];
+                co = country['xml']['outerBoundaryIs']['LinearRing']['coordinates'].split(' ');
+                for (var j in co) {
+                  ca = co[j].split(',');
+                  countryCoords.push(new google.maps.LatLng(ca[1], ca[0]));
+                }
+                createCountry(countryCoords,country);
+              }
+            }.bind(this));
+            showCountries();
+          }
+        }.bind(this)
       });
-      infowindow.open(map, marker);
-  }
+    }
+    
+    function showCountries() {
+      for (var i=0; i<countries.length; i++) {
+        countries[i].setMap(map);
+        google.maps.event.addListener(countries[i],"mouseover",function(){
+          this.setOptions({fillColor: "#f5c879", 'fillOpacity': 0.5});
+        });
+        google.maps.event.addListener(countries[i],"mouseout",function(){
+          this.setOptions({fillColor: "#f5c879", 'fillOpacity': 0});
+        });
+        google.maps.event.addListener(countries[i], 'click', function(event) {
+          alert(this.title+' ('+this.code+')');
+          populate_country_data(this.title);
+        });
+      }
+    }
+    
+    function populate_country_data(country_name){
+      $.ajax({
+        url : '<%= home_index_path %>',
+        cache : true,
+        dataType : 'json',
+        type: 'post',
+        async : true,
+        data: { "country_name": country_name  },
+        success : function(data) {
+            var row = $('<tr><td>' + data.name + '</td><td>' + data.name_es + '</td><td>' + data.name_fr + '</td><td>' + data.name_ar + '</td><td>' + data.woe_note + '</td><td>' + data.income_group + '</td><td>' + data.economy + '</td><td>' + data.gdp_year + '</td><td>' + data.gdp_md + '</td></tr>');
+            $('#myTable').append(row);
+        }
+        .bind(this)
+      });
+    }
+
+    function createCountry(coords, country) {
+      var currentCountry = new google.maps.Polygon({
+        paths: coords,
+        //strokeColor: 'white',
+        title: country.country,
+        code: country.iso,
+        strokeOpacity: 0,
+        //strokeWeight: 1,
+        //fillColor: country['color'], // can be used as default color
+        fillOpacity: 0
+      });
+      countries.push(currentCountry);
+    }
+  });
+
 </script>
 
-<div class="input-group center">
-  <div class="form-outline">
-    <input type="search" id="form1" class="form-control" placeholder="Search" />
-  </div>
-  <button type="button" class="btn btn-primary">
-    Search
-  </button>
-</div>
 
-<h1>Countries Data</h1>
+<div id="map" style="width:100%; height:800px;" class="center"></div>
 
-<%#= form_tag search_products_path, method: 'get', class: 'navbar-form navbar-right' do %>
-    <%#= search_field_tag 'search_query', nil, class: 'form-control me-2', placeholder: 'Search'  %>
-    <%#= submit_tag "Search", class: 'btn btn-success', :name => nil %>
-<%# end %>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCwigc-J6Bax4svQkMvtTN3lyzmtzgIhUc"></script>
 
-<div id="map" style="width:98%; height:800px;"></div>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCwigc-J6Bax4svQkMvtTN3lyzmtzgIhUc&callback=setMarkerOnMap"></script>
+<table id="myTable">
+    <tr>
+        <th>Name EN</th>
+        <th>Name ES</th>
+        <th>Name FR</th>
+        <th>Name AR</th>
+        <th>Woe Note</th>
+        <th>Income Group</th>
+        <th>Economy</th>
+        <th>GDP Year</th>
+        <th>GDP MD</th>
+    </tr>
+</table>
