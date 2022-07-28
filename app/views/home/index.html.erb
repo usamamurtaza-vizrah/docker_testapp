@@ -75,9 +75,14 @@
         async : true,
         data: { "country_name": country_name  },
         success : function(data) {
-            var data_to_show = 'Name EN: ' + data.name + '<br/>' + 'Name ES: ' + data.name_es +  '<br/>' + 'Name FR: ' + data.name_fr + '<br/>' + 'Name AR: ' + data.name_ar + '<br/>' + 'WOE NOTE: ' + data.woe_note + '<br/>' + 'Income Group: ' + data.income_group + '<br/>' + 'Economy: ' + data.economy + '<br/>' + 'GDP Year: ' + data.gdp_year + '<br/>' + 'GDP MD: ' + data.gdp_md + '';
-            $('#country_specific_data').html(data_to_show);
-            $("#modal").modal('show');
+          let items = '<ul class="list-group">'
+          for (country of data){
+            items += `<li class="list-group-item d-flex justify-content-between align-items-center">${country.key}<span>${country.value}</span></li>`
+          }
+          items += '</ul>' 
+          console.log(items);
+          $('#country_specific_data').html(items);
+          $("#modal").modal('show');
         }
         .bind(this)
       });
@@ -97,6 +102,7 @@
 
 </script>
 
+<h1 class = "center">Select Country To Get Relevant Data</h1>
 
 <div id="map" class="center" style="width:100%; height:800px;"></div>
 
@@ -107,11 +113,14 @@
   <div class="modal-dialog modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="country_specific_data"></h5>
-      </div>
+        <h5 class="modal-title">Selected Country Information</h5>
+      </div> 
+        <div id = "country_specific_data">
+        </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
+  
